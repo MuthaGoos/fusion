@@ -6,6 +6,31 @@ What I learned:
 
 
 
+Strategy:
+
+  The stack contains multiple pointers to itself. I leverage one of these pointers to return to code stored on the stack
+ 
+      | real_path[128]
+      |_______________
+      |__ebp__________
+      |__eip__________
+      |__char*_q______ 
+    ,-|__char*_path___
+    | |  char* buffer[1024
+    `>|
+      |____________________
+
+     I pop from the stack until I execute a return with* path at the top of the stack
+      this drops me into my buffer, which contains path as well.  The values in path act like trampoline
+      to get me to my shellcode that exists after "HTTP/1.1"
+
+
+      Start              _____________________________            ______________________
+       |                 ^                            |           ^                     |
+       V                 |                            V           |                     V
+       \x90......jmp +0x40....stack variables...\x90......jmp +0x40....HTTP/1.1...\x90......shellcode
+
+
 How to win:
 
     python pwnlevel01.sh > exploit
