@@ -1,0 +1,51 @@
+About
+
+This level deals with some basic obfuscation / math stuff.
+
+This level introduces non-executable memory and return into libc / .text / return orientated programming (ROP).
+
+Vulnerability Type			Stack
+Position Independent Executable		No
+Read only relocations			No
+Non-Executable stack			Yes
+Non-Executable heap			Yes
+Address Space Layout Randomisation	Yes
+Source Fortification			No
+
+
+Generate key and xor it with incoming data
+
+key[32] = /dev/urandom
+
+for(j = 0; j < blocks; j++) {
+      blahi[j] ^= keybuf[j % XORSZ];
+}
+
+Attacking the key is the first part of this challenge and can be done so easily
+   Extract the key by:
+      sending 32 integers of 0, or 128 "\x00"s
+      read the output buffer
+   Encode bytes with key
+   When XOR'd contains original value
+
+Steps:
+   send 128 bytes of \x00 to receive key
+   Extract key into variable
+   Encode ROP with key using xor
+   send ROP and overflow
+
+Containing \x00 in shell code is not a big deal anymore because of read call, but is irrelevant b/c nonexecutable stack
+
+Key is assigned with this code
+   0x0804975b <+38>:	mov    DWORD PTR [esp+0x8],0x80
+   0x08049763 <+46>:	mov    DWORD PTR [esp+0x4],0x804b480   <--- is the address of key
+   0x0804976b <+54>:	mov    eax,DWORD PTR [ebp-0x14]
+   0x0804976e <+57>:	mov    DWORD PTR [esp],eax
+   0x08049771 <+60>:	call   0x8048860 <read@plt>
+
+
+We know the address of key, and it's in R/W space.  
+Would it be possible to set esp to 0x804b480 and use that area like a stack?
+
+Permissions of memory region
+  0x804b420->0x804b500 at 0x00002418: .bss ALLOC   <-- Can I execute in this space?
