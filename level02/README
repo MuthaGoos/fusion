@@ -252,4 +252,26 @@ Revised strategy:
 We control EBP, and encrypt file picks the location to write the buffer based on offset from ebp.  Therefore, it is possible to have encrypt file write to 
 arbitrary memory locations.  The next step is rop into encrypt_file such that I can put my shell code into a RWX section or set up a call to execve
 
+Writable Sections:
+
+  [18] .init_array       INIT_ARRAY      0804b274 002274 000008 00  WA  0   0  4
+  [19] .ctors            PROGBITS        0804b27c 00227c 000008 00  WA  0   0  4
+  [20] .dtors            PROGBITS        0804b284 002284 000008 00  WA  0   0  4
+  [21] .jcr              PROGBITS        0804b28c 00228c 000004 00  WA  0   0  4
+  [22] .dynamic          DYNAMIC         0804b290 002290 0000d8 08  WA  6   0  4
+  [23] .got              PROGBITS        0804b368 002368 000004 04  WA  0   0  4
+  [24] .got.plt          PROGBITS        0804b36c 00236c 0000a4 04  WA  0   0  4
+  [25] .data             PROGBITS        0804b410 002410 000008 00  WA  0   0  4
+  [26] .bss              NOBITS          0804b420 002418 0000e0 00  WA  0   0 32
+
+Executable Sections:
+  [11] .init             PROGBITS        080487ec 0007ec 00002e 00  AX  0   0  4
+  [12] .plt              PROGBITS        08048820 000820 000270 04  AX  0   0 16
+  [13] .text             PROGBITS        08048a90 000a90 000f7c 00  AX  0   0 16
+  [14] .fini             PROGBITS        08049a0c 001a0c 00001a 00  AX  0   0  4
+
+Because there is no overlap between writable and executable sections, will need to set EBP to bss region then call execve from the plt
+
+
+
 
